@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FollowUpAI — Post-Exhibition Contact Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0e1a;--s:#111827;--s2:#1a2235;--b:rgba(255,255,255,0.08);--a:#00d4aa;--a2:#0099ff;--t:#f0f4ff;--m:#8892a4;--r:10px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 15%,rgba(0,212,170,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 85%,rgba(0,153,255,0.07) 0%,transparent 50%);pointer-events:none;z-index:0}
+header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--b);background:rgba(10,14,26,0.95);backdrop-filter:blur(12px)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px}
+.logo span{background:linear-gradient(135deg,var(--a),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo small{font-size:10px;color:var(--m);font-weight:400;margin-left:8px;letter-spacing:1px;text-transform:uppercase;-webkit-text-fill-color:var(--m)}
+.stats{display:flex;gap:20px}
+.stat{text-align:center}
+.stat-n{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--a);line-height:1}
+.stat-l{font-size:9px;color:var(--m);text-transform:uppercase;letter-spacing:0.5px}
+main{position:relative;z-index:10;display:grid;grid-template-columns:360px 1fr;flex:1;min-height:0;height:calc(100vh - 60px)}
+.left{border-right:1px solid var(--b);display:flex;flex-direction:column;background:rgba(17,24,39,0.5)}
+.tabs{display:flex;border-bottom:1px solid var(--b);flex-shrink:0}
+.tab{flex:1;padding:11px 8px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;color:var(--m);border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.tab.active{color:var(--a);border-bottom-color:var(--a)}
+.tab-pane{display:none;flex-direction:column;flex:1;overflow:hidden}
+.tab-pane.active{display:flex}
+.add-form{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;flex:1}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;color:var(--m);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.field input,.field select,.field textarea{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:8px 11px;font-size:12px;color:var(--t);font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;width:100%}
+.field input:focus,.field textarea:focus{border-color:var(--a)}
+.field textarea{resize:none;height:54px}
+.camera-zone{border:1.5px dashed rgba(0,212,170,0.3);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all 0.3s;background:rgba(0,212,170,0.03);position:relative}
+.camera-zone:hover{border-color:var(--a);background:rgba(0,212,170,0.08)}
+.camera-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.camera-zone .ci{font-size:22px;margin-bottom:5px}
+.camera-zone strong{font-size:12px;color:var(--a);display:block;margin-bottom:2px}
+.camera-zone p{font-size:10px;color:var(--m)}
+.or-div{display:flex;align-items:center;gap:8px}
+.or-div span{font-size:10px;color:var(--m);white-space:nowrap}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--b)}
+.btn-add{width:100%;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--a),var(--a2));color:#0a0e1a;font-weight:700;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.2s}
+.btn-add:hover{opacity:0.9}
+.contacts-list{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:7px}
+.contacts-list::-webkit-scrollbar{width:3px}
+.contacts-list::-webkit-scrollbar-thumb{background:var(--b);border-radius:2px}
+.cc{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:all 0.2s;position:relative}
+.cc:hover{border-color:rgba(0,212,170,0.4)}
+.cc.active{border-color:var(--a);background:rgba(0,212,170,0.06)}
+.cc.done{border-color:rgba(0,212,170,0.2)}
+.cc-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.cc-av{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(0,212,170,0.15),rgba(0,153,255,0.15));border:1px solid rgba(0,212,170,0.2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--a);flex-shrink:0}
+.cc-name{font-weight:600;font-size:13px;line-height:1.2}
+.cc-co{font-size:11px;color:var(--m)}
+.cc-tags{display:flex;gap:5px;flex-wrap:wrap}
+.cc-tag{font-size:9px;padding:2px 7px;border-radius:8px;background:rgba(0,153,255,0.1);color:var(--a2);border:1px solid rgba(0,153,255,0.2)}
+.cc-tag.done{background:rgba(0,212,170,0.1);color:var(--a);border-color:rgba(0,212,170,0.2)}
+.cc-del{position:absolute;top:8px;right:8px;background:transparent;border:none;color:var(--m);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:4px;transition:color 0.2s}
+.cc-del:hover{color:#ff6b6b}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;color:var(--m)}
+.empty .ei{font-size:36px;margin-bottom:10px;opacity:0.4}
+.empty p{font-size:12px;line-height:1.6}
+.right{display:flex;flex-direction:column;overflow:hidden}
+.right-header{padding:18px 24px 14px;border-bottom:1px solid var(--b);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0}
+.right-header h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+.right-header p{font-size:12px;color:var(--m);margin-top:3px}
+.right-acts{display:flex;gap:7px;flex-shrink:0}
+.btn-o{padding:7px 14px;border-radius:8px;border:1px solid var(--b);background:transparent;color:var(--m);font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.btn-o:hover{border-color:var(--a2);color:var(--a2)}
+.btn-p{padding:7px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--a),var(--a2));color:#0a0e1a;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity 0.2s}
+.btn-p:hover{opacity:0.9}
+.btn-p:disabled{opacity:0.4;cursor:not-allowed}
+.workspace{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.no-sel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
+.no-sel .ni{font-size:56px;margin-bottom:16px;opacity:0.25}
+.no-sel h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px;opacity:0.5}
+.no-sel p{color:var(--m);font-size:13px;line-height:1.6;max-width:300px}
+.email-editor{flex:1;overflow-y:auto;padding:18px 24px;display:flex;flex-direction:column;gap:14px}
+.email-editor::-webkit-scrollbar{width:3px}
+.email-editor::-webkit-scrollbar-thumb{background:var(--b);border-radius:2px}
+.cp{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px}
+.cp-av{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,rgba(0,212,170,0.15),rgba(0,153,255,0.15));border:1px solid rgba(0,212,170,0.2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--a);flex-shrink:0}
+.cp-info{flex:1}
+.cp-name{font-weight:600;font-size:15px}
+.cp-det{font-size:12px;color:var(--m);margin-top:2px}
+.cp-tags{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.cp-tag{font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(0,153,255,0.1);color:var(--a2);border:1px solid rgba(0,153,255,0.15)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.ctrl{display:flex;flex-direction:column;gap:5px}
+.ctrl label{font-size:10px;color:var(--m);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.ctrl select{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--t);font-family:'DM Sans',sans-serif;outline:none}
+.ctrl textarea{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--t);font-family:'DM Sans',sans-serif;outline:none;resize:none;height:52px;width:280px;transition:border-color 0.2s}
+.ctrl textarea:focus{border-color:var(--a)}
+.btn-gen{padding:9px 20px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--a),var(--a2));color:#0a0e1a;font-weight:700;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.2s;align-self:flex-end;display:flex;align-items:center;gap:6px}
+.btn-gen:hover{opacity:0.9}
+.btn-gen:disabled{opacity:0.4;cursor:not-allowed}
+.email-result{display:flex;flex-direction:column;gap:10px}
+.subj-row{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:8px}
+.subj-row label{font-size:10px;color:var(--m);white-space:nowrap;font-weight:600;text-transform:uppercase}
+.subj-row input{flex:1;background:transparent;border:none;color:var(--t);font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;outline:none}
+.email-body{width:100%;min-height:180px;background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:14px;font-size:12px;color:var(--t);font-family:'DM Sans',sans-serif;line-height:1.7;resize:none;outline:none;transition:border-color 0.2s}
+.email-body:focus{border-color:var(--a)}
+.email-acts{display:flex;gap:8px;padding-bottom:4px}
+.btn-gmail{flex:1;padding:9px;border-radius:8px;border:1px solid rgba(234,67,53,0.4);background:rgba(234,67,53,0.08);color:#ea4335;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-gmail:hover{background:rgba(234,67,53,0.15)}
+.btn-outlook{flex:1;padding:9px;border-radius:8px;border:1px solid rgba(0,120,212,0.4);background:rgba(0,120,212,0.08);color:#0078d4;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-outlook:hover{background:rgba(0,120,212,0.15)}
+.btn-copy-e{padding:9px 14px;border-radius:8px;border:1px solid var(--b);background:transparent;color:var(--m);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s}
+.btn-copy-e:hover{border-color:var(--a2);color:var(--a2)}
+.gen-loading{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px}
+.spin{width:36px;height:36px;border-radius:50%;border:3px solid var(--b);border-top-color:var(--a);animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gen-loading p{color:var(--m);font-size:13px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s);border:1px solid rgba(0,212,170,0.3);border-radius:var(--r);padding:10px 16px;font-size:12px;color:var(--a);z-index:100;animation:ti 0.3s ease}
+@keyframes ti{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.spin-sm{width:14px;height:14px;border-radius:50%;border:2px solid var(--b);border-top-color:var(--a);animation:spin 0.8s linear infinite;flex-shrink:0}
+.proc{display:flex;align-items:center;gap:10px;padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);font-size:12px;color:var(--m)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">FollowUp<span>AI</span><small>by Fuels24</small></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="tn">0</div><div class="stat-l">Total</div></div>
+      <div class="stat"><div class="stat-n" id="sn" style="color:var(--a2)">0</div><div class="stat-l">Sent</div></div>
+      <div class="stat"><div class="stat-n" id="pn" style="color:#f59e0b">0</div><div class="stat-l">Pending</div></div>
+    </div>
+    <button class="btn-o" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+</header>
+
+<main>
+  <aside class="left">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('add')">➕ Add Contact</button>
+      <button class="tab" onclick="switchTab('list')">📋 All Contacts</button>
+    </div>
+    <div class="tab-pane active" id="tabAdd">
+      <div class="add-form">
+        <div class="camera-zone" id="czone">
+          <input type="file" accept="image/*" id="cardPhoto" onchange="handlePhoto(this)">
+          <div class="ci">📷</div>
+          <strong>Photo Business Card</strong>
+          <p>AI extracts name, email, company automatically</p>
+        </div>
+        <div class="or-div"><span>or enter manually</span></div>
+        <div class="field"><label>Full Name *</label><input type="text" id="cName" placeholder="Tanaka Hiroshi"></div>
+        <div class="field"><label>Company</label><input type="text" id="cCo" placeholder="Mitsubishi Electric"></div>
+        <div class="field"><label>Email *</label><input type="email" id="cEmail" placeholder="h.tanaka@company.com"></div>
+        <div class="field"><label>Position</label><input type="text" id="cPos" placeholder="Sales Director"></div>
+        <div class="field">
+          <label>Country</label>
+          <select id="cCountry">
+            <option value="">Select...</option>
+            <option>🇹🇭 Thailand</option><option>🇯🇵 Japan</option><option>🇰🇷 South Korea</option>
+            <option>🇨🇳 China</option><option>🇩🇪 Germany</option><option>🇺🇸 USA</option>
+            <option>🇸🇬 Singapore</option><option>🇮🇳 India</option><option>🇻🇳 Vietnam</option>
+            <option>🇮🇩 Indonesia</option><option>🇲🇾 Malaysia</option><option>🌍 Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Notes from conversation</label><textarea id="cNotes" placeholder="Interested in pumps HP-200, budget ~$20k, decision Q3..."></textarea></div>
+        <button class="btn-add" onclick="addContact()">+ Add Contact</button>
+      </div>
+    </div>
+    <div class="tab-pane" id="tabList">
+      <div class="contacts-list" id="contactsList">
+        <div class="empty"><div class="ei">👥</div><p>No contacts yet.</p></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="right">
+    <div class="right-header">
+      <div><h2 id="rTitle">Select a contact</h2><p id="rSub">Choose from the list to generate a follow-up email</p></div>
+      <div class="right-acts" id="rActs" style="display:none">
+        <button class="btn-o" onclick="toggleDone()">✅ Mark as Sent</button>
+        <button class="btn-p" onclick="generateEmail()">⚡ Generate Email</button>
+      </div>
+    </div>
+    <div class="workspace" id="workspace">
+      <div class="no-sel">
+        <div class="ni">✉️</div>
+        <h3>Ready to Follow Up</h3>
+        <p>Add contacts from your exhibition, select one, and generate a personalised email in their language in seconds.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+let contacts=[], selectedId=null;
+
+// Demo contacts
+contacts=[
+  {id:1,name:'Tanaka Hiroshi',co:'Mitsubishi Electric Thailand',email:'h.tanaka@mitsubishi.co.th',pos:'Sales Manager',country:'🇯🇵 Japan',notes:'Interested in automation solutions, met at Manufacturing Expo Bangkok',done:false,time:new Date().toISOString()},
+  {id:2,name:'Somchai Jaidee',co:'Thai Industrial Co.',email:'s.jaidee@thaind.co.th',pos:'Plant Manager',country:'🇹🇭 Thailand',notes:'Looking for pump solutions, budget 50k USD, decision Q4',done:false,time:new Date().toISOString()},
+  {id:3,name:'Park Ji-young',co:'Samsung C&T',email:'jy.park@samsung.com',pos:'Procurement Director',country:'🇰🇷 South Korea',notes:'Needs heat exchangers for new factory, RFQ next month',done:true,time:new Date().toISOString()},
+];
+renderContacts(); updateStats();
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',(i===0)===(t==='add')));
+  document.getElementById('tabAdd').classList.toggle('active',t==='add');
+  document.getElementById('tabList').classList.toggle('active',t==='list');
+  if(t==='list') renderContacts();
+}
+
+function addContact(){
+  const name=document.getElementById('cName').value.trim();
+  const email=document.getElementById('cEmail').value.trim();
+  if(!name||!email){toast('Please fill in name and email');return;}
+  const c={id:Date.now(),name,co:document.getElementById('cCo').value.trim(),email,pos:document.getElementById('cPos').value.trim(),country:document.getElementById('cCountry').value,notes:document.getElementById('cNotes').value.trim(),done:false,time:new Date().toISOString()};
+  contacts.unshift(c); renderContacts(); updateStats();
+  ['cName','cCo','cEmail','cPos','cNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cCountry').value='';
+  switchTab('list'); selectContact(c.id); toast('✅ Contact added!');
+}
+
+async function handlePhoto(input){
+  const file=input.files[0]; if(!file) return;
+  const czone=document.getElementById('czone');
+  czone.innerHTML='<div class="proc"><div class="spin-sm"></div><span>Reading business card...</span></div>';
+  try{
+    const reader=new FileReader();
+    reader.onload=async(e)=>{
+      const b64=e.target.result.split(',')[1];
+      const mt=file.type||'image/jpeg';
+      try{
+        const r=await fetch('/.netlify/functions/claude',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            model:'claude-haiku-4-5-20251001',max_tokens:300,
+            messages:[{role:'user',content:[
+              {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+              {type:'text',text:'Extract contact info from this business card. Return ONLY JSON: {"name":"","company":"","email":"","position":"","country":""}'}
+            ]}]
+          })
+        });
+        const d=await r.json();
+        const txt=d.content?.[0]?.text||'';
+        const m=txt.match(/\{[\s\S]*\}/);
+        if(m){
+          const info=JSON.parse(m[0]);
+          if(info.name) document.getElementById('cName').value=info.name;
+          if(info.company) document.getElementById('cCo').value=info.company;
+          if(info.email) document.getElementById('cEmail').value=info.email;
+          if(info.position) document.getElementById('cPos').value=info.position;
+          toast('✅ Card data extracted!');
+        }
+      }catch(e){toast('Could not extract card data');}
+      resetCzone();
+    };
+    reader.readAsDataURL(file);
+  }catch(e){resetCzone();toast('Error reading image');}
+}
+
+function resetCzone(){
+  document.getElementById('czone').innerHTML=`<input type="file" accept="image/*" id="cardPhoto" onchange="handlePhoto(this)"><div class="ci">📷</div><strong>Photo Business Card</strong><p>AI extracts name, email, company automatically</p>`;
+}
+
+function renderContacts(){
+  const list=document.getElementById('contactsList');
+  if(!contacts.length){list.innerHTML='<div class="empty"><div class="ei">👥</div><p>No contacts yet.</p></div>';return;}
+  list.innerHTML=contacts.map(c=>`
+    <div class="cc ${c.done?'done':''} ${c.id===selectedId?'active':''}" onclick="selectContact(${c.id})">
+      <button class="cc-del" onclick="event.stopPropagation();deleteContact(${c.id})">✕</button>
+      <div class="cc-top">
+        <div class="cc-av">${initials(c.name)}</div>
+        <div><div class="cc-name">${c.name}</div><div class="cc-co">${c.co||'—'}</div></div>
+      </div>
+      <div class="cc-tags">
+        ${c.country?`<span class="cc-tag">${c.country}</span>`:''}
+        ${c.done?'<span class="cc-tag done">✅ Sent</span>':'<span class="cc-tag" style="color:#f59e0b;border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08)">Pending</span>'}
+      </div>
+    </div>`).join('');
+}
+
+function selectContact(id){
+  selectedId=id;
+  const c=contacts.find(x=>x.id===id); if(!c) return;
+  renderContacts();
+  document.getElementById('rTitle').textContent=c.name;
+  document.getElementById('rSub').textContent=`${c.pos||'Contact'}${c.co?' · '+c.co:''} · ${c.country||''}`;
+  document.getElementById('rActs').style.display='flex';
+  document.getElementById('workspace').innerHTML=`
+    <div class="email-editor">
+      <div class="cp">
+        <div class="cp-av">${initials(c.name)}</div>
+        <div class="cp-info">
+          <div class="cp-name">${c.name}</div>
+          <div class="cp-det">${c.email}${c.pos?' · '+c.pos:''}</div>
+          <div class="cp-tags">
+            ${c.co?`<span class="cp-tag">${c.co}</span>`:''}
+            ${c.country?`<span class="cp-tag">${c.country}</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="ctrl">
+          <label>Email Language</label>
+          <select id="eLang">
+            <option value="English">🇬🇧 English</option>
+            <option value="Japanese" ${c.country?.includes('Japan')?'selected':''}>🇯🇵 Japanese</option>
+            <option value="Thai" ${c.country?.includes('Thailand')?'selected':''}>🇹🇭 Thai</option>
+            <option value="Korean" ${c.country?.includes('Korea')?'selected':''}>🇰🇷 Korean</option>
+            <option value="Chinese" ${c.country?.includes('China')?'selected':''}>🇨🇳 Chinese</option>
+            <option value="German" ${c.country?.includes('Germany')?'selected':''}>🇩🇪 German</option>
+            <option value="Russian">🇷🇺 Russian</option>
+          </select>
+        </div>
+        <div class="ctrl">
+          <label>Email Type</label>
+          <select id="eType">
+            <option value="followup">👋 Post-exhibition follow-up</option>
+            <option value="proposal">📋 Send proposal</option>
+            <option value="warm">🔥 Warm — showed strong interest</option>
+            <option value="cold">❄️ Cold — brief meeting</option>
+          </select>
+        </div>
+        <div class="ctrl">
+          <label>Your Company & Product</label>
+          <textarea id="eSender" placeholder="e.g. Fuels24 — AI sales tools...">Fuels24 Inc — AI sales automation: CatalogAI, FollowUpAI, AISalesEngine</textarea>
+        </div>
+        <button class="btn-gen" onclick="generateEmail()"><span>⚡</span> Generate Email</button>
+      </div>
+      <div id="emailResult"></div>
+    </div>`;
+}
+
+async function generateEmail(){
+  const c=contacts.find(x=>x.id===selectedId); if(!c) return;
+  const lang=document.getElementById('eLang')?.value||'English';
+  const type=document.getElementById('eType')?.value||'followup';
+  const sender=document.getElementById('eSender')?.value||'';
+  const btn=document.querySelector('.btn-gen');
+  if(btn){btn.disabled=true;btn.innerHTML='<div class="spin-sm"></div> Writing...';}
+  const res=document.getElementById('emailResult');
+  if(res) res.innerHTML='<div class="gen-loading"><div class="spin"></div><p>Writing personalised email in '+lang+'...</p></div>';
+  const types={followup:'a warm post-exhibition follow-up email mentioning the meeting at Manufacturing Expo Bangkok 2026',proposal:'an email proposing to send a commercial proposal',warm:'a warm follow-up — the person showed strong interest',cold:'a brief professional follow-up after a short meeting'};
+  try{
+    const r=await fetch('/.netlify/functions/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',max_tokens:800,
+        system:`Write ${types[type]} in ${lang}. Be personal, professional, concise. Reference Manufacturing Expo Bangkok 2026. Format: first line "SUBJECT: [subject]", then "---", then email body.`,
+        messages:[{role:'user',content:`Write email to:\nName: ${c.name}\nCompany: ${c.co||'their company'}\nPosition: ${c.pos||''}\nCountry: ${c.country||''}\nEmail: ${c.email}\nNotes: ${c.notes||'met at Manufacturing Expo Bangkok'}\nOur company: ${sender}`}]
+      })
+    });
+    const d=await r.json();
+    const txt=d.content?.[0]?.text?.trim()||'';
+    let subject='Following up — Manufacturing Expo Bangkok',body=txt;
+    const sm=txt.match(/SUBJECT:\s*(.+)/i);
+    if(sm){subject=sm[1].trim();body=txt.replace(/SUBJECT:\s*.+/i,'').replace(/^---\s*/m,'').trim();}
+    if(res) res.innerHTML=`
+      <div class="email-result">
+        <div class="subj-row"><label>Subject:</label><input type="text" id="eSubj" value="${esc(subject)}"></div>
+        <textarea class="email-body" id="eBody">${esc(body)}</textarea>
+        <div class="email-acts">
+          <button class="btn-gmail" onclick="openGmail()">📧 Open in Gmail</button>
+          <button class="btn-outlook" onclick="openOutlook()">📨 Open in Outlook</button>
+          <button class="btn-copy-e" onclick="copyEmail()">📋 Copy</button>
+        </div>
+      </div>`;
+  }catch(e){if(res) res.innerHTML='<p style="color:var(--m);padding:16px;font-size:12px">❌ Error: '+e.message+'</p>';}
+  if(btn){btn.disabled=false;btn.innerHTML='⚡ Regenerate';}
+}
+
+function openGmail(){
+  const c=contacts.find(x=>x.id===selectedId);
+  window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(c?.email||'')}&su=${encodeURIComponent(document.getElementById('eSubj')?.value||'')}&body=${encodeURIComponent(document.getElementById('eBody')?.value||'')}`,'_blank');
+}
+function openOutlook(){
+  const c=contacts.find(x=>x.id===selectedId);
+  window.open(`https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(c?.email||'')}&subject=${encodeURIComponent(document.getElementById('eSubj')?.value||'')}&body=${encodeURIComponent(document.getElementById('eBody')?.value||'')}`,'_blank');
+}
+function copyEmail(){
+  navigator.clipboard.writeText(`Subject: ${document.getElementById('eSubj')?.value||''}\n\n${document.getElementById('eBody')?.value||''}`).then(()=>toast('✅ Copied!'));
+}
+function toggleDone(){
+  const c=contacts.find(x=>x.id===selectedId);
+  if(c){c.done=!c.done;renderContacts();updateStats();toast(c.done?'✅ Marked as sent!':'Marked as pending');}
+}
+function deleteContact(id){
+  contacts=contacts.filter(x=>x.id!==id);
+  if(selectedId===id){selectedId=null;document.getElementById('workspace').innerHTML='<div class="no-sel"><div class="ni">✉️</div><h3>Select a contact</h3></div>';document.getElementById('rActs').style.display='none';}
+  renderContacts();updateStats();
+}
+function updateStats(){
+  document.getElementById('tn').textContent=contacts.length;
+  document.getElementById('sn').textContent=contacts.filter(c=>c.done).length;
+  document.getElementById('pn').textContent=contacts.filter(c=>!c.done).length;
+}
+function exportCSV(){
+  if(!contacts.length){toast('No contacts yet');return;}
+  const h=['Name','Company','Email','Position','Country','Notes','Status','Added'];
+  const rows=contacts.map(c=>[c.name,c.co,c.email,c.pos,c.country,c.notes,c.done?'Sent':'Pending',c.time]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`contacts_${new Date().toISOString().split('T')[0]}.csv`;a.click();
+  toast('✅ Exported!');
+}
+function initials(n){return(n||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),3000);}
+</script>
+</body>
+</html>
