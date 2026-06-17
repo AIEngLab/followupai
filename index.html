@@ -388,7 +388,16 @@ async function generateEmail(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',max_tokens:800,
-        system:`Write ${types[type]} in ${lang}. Be personal, professional, concise. Reference Manufacturing Expo Bangkok 2026. Format: first line "SUBJECT: [subject]", then "---", then email body.`,
+        system:`Write ${types[type]} in ${lang}. Be personal, professional, concise. Reference Manufacturing Expo Bangkok 2026. 
+
+The email MUST include, woven naturally into the body:
+1. A link to our products page: https://m33533677-blip.github.io/fuels24/
+2. A brief mention of our AI Sales Support Engine — it finds new customers, tracks competitors and the plans/actions of existing customers, validates new customers for bankruptcy and sanctions risk, creates price and cost calculations, develops legal contracts across different jurisdictions, works like a magic ball predicting market and customer developments, and reaches out directly to real decision-makers inside customer companies.
+3. A polite request to share their product catalog in electronic form.
+4. A mention that we'll be at the expo through June 18-19 and would love to meet again.
+5. Contact details for follow-up: Telegram @Petrom24, Phone +66996299676, Email z@fuels24.com
+
+Format: first line "SUBJECT: [subject]", then "---", then email body.`,
         messages:[{role:'user',content:`Write email to:\nName: ${c.name}\nCompany: ${c.co||'their company'}\nPosition: ${c.pos||''}\nCountry: ${c.country||''}\nEmail: ${c.email}\nNotes: ${c.notes||'met at Manufacturing Expo Bangkok'}\nOur company: ${sender}`}]
       })
     });
