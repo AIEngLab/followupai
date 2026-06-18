@@ -116,6 +116,27 @@ main{position:relative;z-index:10;display:grid;grid-template-columns:360px 1fr;f
 @keyframes ti{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .spin-sm{width:14px;height:14px;border-radius:50%;border:2px solid var(--b);border-top-color:var(--a);animation:spin 0.8s linear infinite;flex-shrink:0}
 .proc{display:flex;align-items:center;gap:10px;padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);font-size:12px;color:var(--m)}
+@media (max-width:768px){
+  header{padding:10px 14px;flex-wrap:wrap;gap:8px}
+  .logo{font-size:15px}
+  .logo small{display:none}
+  .stats{gap:10px}
+  .stat-n{font-size:16px}
+  main{display:flex;flex-direction:column;height:calc(100vh - 50px);grid-template-columns:none}
+  .left{width:100%;border-right:none;border-bottom:1px solid var(--b)}
+  main.show-detail .left{display:none}
+  main:not(.show-detail) .right{display:none}
+  .right{width:100%}
+  .right-header{padding:12px 14px}
+  .right-header h2{font-size:16px}
+  .right-header p{font-size:12px}
+  .right-acts{flex-wrap:wrap}
+  .btn-back-mobile{display:inline-flex !important}
+  .email-editor{padding:12px 14px}
+  .controls{flex-direction:column;align-items:stretch}
+  .ctrl{width:100%}
+}
+.btn-back-mobile{display:none;align-items:center;gap:6px;background:none;border:none;color:var(--a);font-size:13px;font-weight:600;cursor:pointer;padding:0;margin-bottom:10px;font-family:'DM Sans',sans-serif}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -174,7 +195,10 @@ main{position:relative;z-index:10;display:grid;grid-template-columns:360px 1fr;f
 
   <div class="right">
     <div class="right-header">
-      <div><h2 id="rTitle">Select a contact</h2><p id="rSub">Choose from the list to generate a follow-up email</p></div>
+      <div>
+        <button class="btn-back-mobile" onclick="backToList()">← Back to contacts</button>
+        <h2 id="rTitle">Select a contact</h2><p id="rSub">Choose from the list to generate a follow-up email</p>
+      </div>
       <div class="right-acts" id="rActs" style="display:none">
         <button class="btn-o" onclick="toggleDone()">✅ Mark as Sent</button>
         <button class="btn-p" onclick="generateEmail()">⚡ Generate Email</button>
@@ -192,6 +216,10 @@ main{position:relative;z-index:10;display:grid;grid-template-columns:360px 1fr;f
 
 <script>
 let contacts=[], selectedId=null;
+
+function backToList(){
+  document.querySelector('main').classList.remove('show-detail');
+}
 
 // ── SUPABASE CONFIG ──
 const SUPABASE_URL = 'https://ajsntrotksigztacunmn.supabase.co';
@@ -324,6 +352,7 @@ function selectContact(id){
   selectedId=id;
   const c=contacts.find(x=>x.id===id); if(!c) return;
   renderContacts();
+  document.querySelector('main').classList.add('show-detail');
   document.getElementById('rTitle').textContent=c.name;
   document.getElementById('rSub').textContent=`${c.pos||'Contact'}${c.co?' · '+c.co:''} · ${c.country||''}`;
   document.getElementById('rActs').style.display='flex';
