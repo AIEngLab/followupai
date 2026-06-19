@@ -437,8 +437,11 @@ Format: first line "SUBJECT: [subject]", then "---", then email body.`,
     let subject='Following up — Manufacturing Expo Bangkok',body=txt;
     const sm=txt.match(/SUBJECT:\s*(.+)/i);
     if(sm){subject=sm[1].trim();body=txt.replace(/SUBJECT:\s*.+/i,'').replace(/^---\s*/m,'').trim();}
-    // Replace any [Your Name] placeholder and ensure Gleb signature
+    // Replace any [Your Name] placeholder
     body=body.replace(/\[Your Name\]/gi,'Gleb').replace(/\[Ваше имя\]/gi,'Глеб').replace(/\[お名前\]/gi,'Gleb').replace(/\[이름\]/gi,'Gleb').replace(/\[您的姓名\]/gi,'Gleb').replace(/\[ชื่อของคุณ\]/gi,'Gleb');
+    // Remove any existing closing/signature lines and add fixed signature
+    body=body.replace(/\n+(Best regards|Kind regards|Sincerely|Regards|С уважением|Всего хорошего|С наилучшими пожеланиями)[,\s\S]*$/i,'').trimEnd();
+    body+='\n\nВсего хорошего,\nГлеб\nFuels24 Inc';
     if(res) res.innerHTML=`
       <div class="email-result">
         <div class="subj-row"><label>Subject:</label><input type="text" id="eSubj" value="${esc(subject)}"></div>
