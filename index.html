@@ -426,6 +426,8 @@ The email MUST include, woven naturally into the body:
 4. A mention that we'll be at the expo through June 18-19 and would love to meet again.
 5. Contact details for follow-up: Telegram @Petrom24, Phone +66996299676, Email z@fuels24.com
 
+End the email with a closing line (e.g. "Best regards," / "Kind regards," / appropriate equivalent in the target language) followed by the signature "Gleb" and "Fuels24 Inc" — do NOT use a placeholder like [Your Name].
+
 Format: first line "SUBJECT: [subject]", then "---", then email body.`,
         messages:[{role:'user',content:`Write email to:\nName: ${c.name}\nCompany: ${c.co||'their company'}\nPosition: ${c.pos||''}\nCountry: ${c.country||''}\nEmail: ${c.email}\nNotes: ${c.notes||'met at Manufacturing Expo Bangkok'}\nOur company: ${sender}`}]
       })
