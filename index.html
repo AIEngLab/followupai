@@ -440,8 +440,9 @@ Format: first line "SUBJECT: [subject]", then "---", then email body.`,
     // Replace any [Your Name] placeholder
     body=body.replace(/\[Your Name\]/gi,'Gleb').replace(/\[Ваше имя\]/gi,'Глеб').replace(/\[お名前\]/gi,'Gleb').replace(/\[이름\]/gi,'Gleb').replace(/\[您的姓名\]/gi,'Gleb').replace(/\[ชื่อของคุณ\]/gi,'Gleb');
     // Remove any existing closing/signature lines and add fixed signature
-    body=body.replace(/\n+(Best regards|Kind regards|Warm regards|Sincerely|Regards|Looking forward|С уважением|Всего хорошего|С наилучшими пожеланиями|Искренне|ด้วยความนับถือ|敬上|敬具|경의를 표하며)[,\s\S]*$/i,'').trimEnd();
-    body+='\n\nBest regards,\nGleb\nFuels24 Inc';
+    // Strip everything from last closing/signature line and add fixed signature
+    body=body.replace(/[\n\r]+(Best regards|Kind regards|Warm regards|Sincerely|Regards|Looking forward|Yours sincerely|С уважением|Всего хорошего|С наилучшими пожеланиями|Искренне|ด้วยความนับถือ|敬上|敬具|경의를 표하며)[\s\S]*$/i,'').trimEnd();
+    body=body+"\n\nBest regards,\nGleb\nFuels24 Inc\nTelegram: @Petrom24 | +66996299676 | z@fuels24.com";
     if(res) res.innerHTML=`
       <div class="email-result">
         <div class="subj-row"><label>Subject:</label><input type="text" id="eSubj" value="${esc(subject)}"></div>
